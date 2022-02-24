@@ -1,3 +1,4 @@
+import sys
 from socket import *
 
 
@@ -6,14 +7,30 @@ class Client:
         self.port = 0
         self.host = host
         self.username = input("Choose your nickname: ")
-        self.soc = socket(AF_INET, SOCK_STREAM)
-        self.soc.connect(('127.0.0.1', 50000))
+        try:
+            self.soc = socket(AF_INET, SOCK_STREAM)
+        except socket.error as e:
+            print("Error creating socket: %s" % e)
+            sys.exit(1)
+        try:
+            self.soc.connect(('127.0.0.1', 50000))
+        except socket.error as e:
+            print("Connection error: %s" % e)
+            sys.exit(1)
 
     def connect(self):
         msg = "<connect>" + self.username
         self.soc.send(msg.encode())
 
     def write_to_all(self):
-            msg = self.username + " : " + input()
-            message = '<set_msg_all>' + msg
-            self.soc.send(message.encode())
+        msg = self.username + " : " + input()
+        message = '<set_msg_all>' + msg
+        self.soc.send(message.encode())
+
+    def receive(self):
+        while True:
+            data = self.soc.recv(1024).decode()
+            if not data: break
+            if data.startswith("<msg>"):
+                data = data.removeprefix("<msg>")
+                print(data)

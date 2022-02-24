@@ -3,13 +3,13 @@ from socket import *
 
 
 class Server:
-    # {username:port}[],{filename:file}[] userslist in strings
+    # Create server
     def __init__(self, port, file, sok_range, host):
-        self.userslist = []
+        self.userslist = []  # {username:client soc}[]
         self.clientslist = []
         self.host = host
         self.sok_range = sok_range
-        self.file = file
+        self.file = []  # {filename:file}[]
         self.port = port
         # starting the sever
         self.soc = socket(AF_INET, SOCK_STREAM)
@@ -17,9 +17,11 @@ class Server:
         self.soc.listen(5)
 
     def run(self):
+        client_soc, address = self.soc.accept()
         while True:
             client_soc, addres = self.soc.accept()
             data = client_soc.recv(1024).decode()
+            print(data)
             if not data: break
             # connect to server
             if data.startswith("<connect>"):
@@ -33,6 +35,7 @@ class Server:
             if data.startswith("<set_msg_all>"):
                 data = data.removeprefix("<set_msg_all>")
                 msg = "<msg>" + data
+                print(msg)
                 self.broadcast(msg)
 
     def broadcast(self, message):
@@ -41,7 +44,6 @@ class Server:
 
     # def run_udp(self):
 
-
-if __name__ == '__main__':
-    server = Server(50000, 'b', 15, "127.0.0.1")
-    server.run_tcp()
+# if __name__ == '__main__':
+#     server = Server(50000, 'b', 15, "127.0.0.1")
+#     server.run_tcp()
