@@ -16,23 +16,24 @@ class Server:
         self.soc.bind((host, port))
         self.soc.listen(5)
 
-    def run_tcp(self):
-        client_soc, addres = self.soc.accept()
-        data = client_soc.recv(1024).decode()
-        # if not data: break
-        # connect to server
-        if data.startswith("<connect>"):
-            data = data.removeprefix("<connect>")
-            self.userslist.append(data)
-            self.clientslist.append(client_soc)
-            print(data, "is connected")
-            msg = "<msg>" + data + "is connected"
-            self.broadcast(msg)
-        # send message to all clients
-        if data.startswith("<set_msg_all>"):
-            data = data.removeprefix("<set_msg_all>")
-            msg = "<msg>" + data
-            self.broadcast(msg)
+    def run(self):
+        while True:
+            client_soc, addres = self.soc.accept()
+            data = client_soc.recv(1024).decode()
+            if not data: break
+            # connect to server
+            if data.startswith("<connect>"):
+                data = data.removeprefix("<connect>")
+                self.userslist.append(data)
+                self.clientslist.append(client_soc)
+                print(data, "is connected")
+                msg = "<msg>" + data + "is connected"
+                self.broadcast(msg)
+            # send message to all clients
+            if data.startswith("<set_msg_all>"):
+                data = data.removeprefix("<set_msg_all>")
+                msg = "<msg>" + data
+                self.broadcast(msg)
 
     def broadcast(self, message):
         for client in self.clientslist:
