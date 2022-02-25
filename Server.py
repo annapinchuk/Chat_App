@@ -19,18 +19,36 @@ class Server:
     def run(self):
         client_soc, address = self.soc.accept()
         while True:
-            client_soc, addres = self.soc.accept()
             data = client_soc.recv(1024).decode()
             print(data)
             if not data: break
-            # connect to server
+
+            # Connect to server
             if data.startswith("<connect>"):
                 data = data.removeprefix("<connect>")
                 self.userslist.append(data)
                 self.clientslist.append(client_soc)
                 print(data, "is connected")
-                msg = "<msg>" + data + "is connected"
+                msg = "<msg>" + data + " is connected"
                 self.broadcast(msg)
+
+            # Disconnect a specific user from the server
+            if data.startswith("<disconnect>"):
+                self.clientslist.remove(client_soc)
+                for user, address in self.userslist:
+                    if address == client_soc:
+                        del self.userslist[user]
+                        break
+                    client_soc.close()
+                self.broadcast("<msg>" + user + "has left the chat !")
+
+            # Return a list of the online users
+            if data.startswith("<get_users>"):
+                online = []
+                for user in self.userList:
+                    online.append(self.userslist[user])
+                return online
+
             # send message to all clients
             if data.startswith("<set_msg_all>"):
                 data = data.removeprefix("<set_msg_all>")
@@ -38,9 +56,20 @@ class Server:
                 print(msg)
                 self.broadcast(msg)
 
+            if data.startswith("<set_msg>" + "<username>"):
+                data = data.removeprefix("<set_msg><")
+                # TODO: להפריד בין היוזר לבין ההודעה עצמה ואז לשלוח לקליינט שקשור ליוזר
+                tmp = data.removesuffix(">")
+                msg = "<msg>" + data
+
     def broadcast(self, message):
         for client in self.clientslist:
             client.send(message.encode())
+
+    def send_to_one(self, target, message):
+        for client in self.clientslist:
+            if client == target:
+                target.send(message.encode())
 
     # def run_udp(self):
 
