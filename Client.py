@@ -22,6 +22,14 @@ class Client:
         msg = "<connect>" + self.username
         self.soc.send(msg.encode())
 
+    def disconnect(self):
+        msg = "<disconnect>" + self.username
+        self.soc.send(msg.encode())
+
+    def list_of_users(self):
+        msg = "<get_users>" + self.username
+        self.soc.send(msg.encode())
+
     def write_to_all(self):
         msg = self.username + " : " + input("")
         message = '<set_msg_all>' + msg
@@ -33,4 +41,9 @@ class Client:
             if not data: break
             if data.startswith("<msg>"):
                 data = data.removeprefix("<msg>")
-                print(data)
+                if data.startswith("<users>"):
+                    data = data.removeprefix("<users>")
+                    names = data.split(",")
+                    print(names)
+                else:
+                    print(data)
