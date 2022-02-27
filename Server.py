@@ -5,8 +5,10 @@ from socket import *
 class Server:
     # Create server
     def __init__(self, port, file, sok_range, host):
-        self.userslist = []  # {username:client soc}[]
-        self.clientslist = []
+        self.userslist = []  # queue of usernames
+        self.threadlist = []  # queue of threads
+        self.soclist = []  # queue of sockets
+        self.addresslist = []  # list of addresses
         self.host = host
         self.sok_range = sok_range
         self.file = []  # {filename:file}[]
@@ -14,60 +16,66 @@ class Server:
         # starting the sever
         self.soc = socket(AF_INET, SOCK_STREAM)
         self.soc.bind((host, port))
-        self.soc.listen(5)
 
     def run(self):
-        client_soc, address = self.soc.accept()
+        self.soc.listen(5)
         while True:
-            data = client_soc.recv(1024).decode()
-            print(data)
-            if not data: break
+            client_soc, address = self.soc.accept()
+            main_server_thread = threading.Thread(target=self.receive, args=(client_soc, address))
+            self.threadlist.append(main_server_thread)
+            main_server_thread.start()
 
+    def receive(self, client_soc, address):
+        data = client_soc.recv(1024).decode()
+        print(data)
+        self.soclist.append(client_soc)
+        self.addresslist.append(address)
+        while True:
             # Connect to server
             if data.startswith("<connect>"):
                 data = data.removeprefix("<connect>")
                 self.userslist.append(data)
-                self.clientslist.append(client_soc)
                 print(data, "is connected")
                 msg = "<msg>" + data + " is connected"
                 self.broadcast(msg)
 
             # Disconnect a specific user from the server
-            if data.startswith("<disconnect>"):
-                self.clientslist.remove(client_soc)
+            elif data.startswith("<disconnect>"):
+                self.threadlist.pop(0)
                 for user, address in self.userslist:
                     if address == client_soc:
                         del self.userslist[user]
                         break
+                    self.broadcast("<msg>" + user + "has left the chat !")
                     client_soc.close()
-                self.broadcast("<msg>" + user + "has left the chat !")
+
 
             # Return a list of the online users
-            if data.startswith("<get_users>"):
+            elif data.startswith("<get_users>"):
                 online = []
                 for user in self.userList:
                     online.append(self.userslist[user])
                 return online
 
             # send message to all clients
-            if data.startswith("<set_msg_all>"):
+            elif data.startswith("<set_msg_all>"):
                 data = data.removeprefix("<set_msg_all>")
                 msg = "<msg>" + data
                 print(msg)
                 self.broadcast(msg)
 
-            if data.startswith("<set_msg>" + "<username>"):
+            elif data.startswith("<set_msg>" + "<username>"):
                 data = data.removeprefix("<set_msg><")
                 # TODO: להפריד בין היוזר לבין ההודעה עצמה ואז לשלוח לקליינט שקשור ליוזר
                 tmp = data.removesuffix(">")
                 msg = "<msg>" + data
 
     def broadcast(self, message):
-        for client in self.clientslist:
-            client.send(message.encode())
+        for soc in self.soclist:
+            soc.send(message.encode())
 
     def send_to_one(self, target, message):
-        for client in self.clientslist:
+        for client in self.threadlist:
             if client == target:
                 target.send(message.encode())
 

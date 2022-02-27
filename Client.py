@@ -23,7 +23,7 @@ class Client:
         self.soc.send(msg.encode())
 
     def write_to_all(self):
-        msg = self.username + " : " + input("type here your message: ")
+        msg = self.username + " : " + input("")
         message = '<set_msg_all>' + msg
         self.soc.send(message.encode())
 
