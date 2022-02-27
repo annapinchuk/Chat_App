@@ -1,4 +1,5 @@
 import sys
+import threading
 from socket import *
 
 
@@ -6,7 +7,7 @@ class Client:
     def __init__(self, host):
         self.port = 0
         self.host = host
-        self.username = input("Choose your nickname: ")
+        self.username = input("Enter your name: ")
         try:
             self.soc = socket(AF_INET, SOCK_STREAM)
         except socket.error as e:
@@ -22,10 +23,28 @@ class Client:
         msg = "<connect>" + self.username
         self.soc.send(msg.encode())
 
+    def disconnect(self):
+        msg = "<disconnect>" + self.username
+        self.soc.send(msg.encode())
+
     def write_to_all(self):
-        msg = self.username + " : " + input("type here your message: ")
-        message = '<set_msg_all>' + msg
-        self.soc.send(message.encode())
+        while True:
+            msg = self.username + " : " + input('<set_msg_all> ')
+            message = '<set_msg_all> ' + msg
+            self.soc.send(message.encode())
+
+    def write_to_one(self):
+        while True:
+            msg = self.username + " : " + input('<set_msg>')
+            message = '<set_msg>' + '<username>' + msg
+            name = message.removeprefix('<set_msg><') + message.removesuffix('>')
+            self.soc.send(message.encode())
+
+    def all_onlineUsers(self):
+        while True:
+            msg = self.username + " : " + input('<get_users>')
+            message = '<get_users>' + msg
+            self.soc.send(message.encode())
 
     def receive(self):
         while True:
@@ -34,3 +53,5 @@ class Client:
             if data.startswith("<msg>"):
                 data = data.removeprefix("<msg>")
                 print(data)
+
+#

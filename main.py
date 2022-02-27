@@ -3,14 +3,13 @@ from Client import Client
 from Server import Server
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    client1 = Client('127.0.0.1')
-    client1.connect()
-    # Thread to client receive
-    client1r_thread = threading.Thread(target=client1.receive)
-    client1r_thread.start()
-    client1.write_to_all()
+client1 = Client('127.0.0.1')
+client1.connect()
+# Thread to client receive
+client1r_thread = threading.Thread(target=client1.receive)
+write_thread = threading.Thread(target=client1.write_to_all())
+write_thread.start()
+client1r_thread.start()
 
 
 

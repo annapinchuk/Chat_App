@@ -5,6 +5,7 @@ from socket import *
 class Server:
     # Create server
     def __init__(self, port, file, sok_range, host):
+        print("test")
         self.userslist = []  # {username:client soc}[]
         self.clientslist = []
         self.host = host
@@ -21,14 +22,15 @@ class Server:
         while True:
             data = client_soc.recv(1024).decode()
             print(data)
-            if not data: break
+            if not data:
+                break
 
             # Connect to server
             if data.startswith("<connect>"):
                 data = data.removeprefix("<connect>")
                 self.userslist.append(data)
                 self.clientslist.append(client_soc)
-                print(data, "is connected")
+                print(data, "is connected ")
                 msg = "<msg>" + data + " is connected"
                 self.broadcast(msg)
 
@@ -39,13 +41,13 @@ class Server:
                     if address == client_soc:
                         del self.userslist[user]
                         break
+                    self.broadcast("<msg>" + user + "has left the chat !")
                     client_soc.close()
-                self.broadcast("<msg>" + user + "has left the chat !")
 
             # Return a list of the online users
             if data.startswith("<get_users>"):
                 online = []
-                for user in self.userList:
+                for user in self.userslist:
                     online.append(self.userslist[user])
                 return online
 
@@ -53,14 +55,13 @@ class Server:
             if data.startswith("<set_msg_all>"):
                 data = data.removeprefix("<set_msg_all>")
                 msg = "<msg>" + data
-                print(msg)
                 self.broadcast(msg)
 
             if data.startswith("<set_msg>" + "<username>"):
                 data = data.removeprefix("<set_msg><")
-                # TODO: להפריד בין היוזר לבין ההודעה עצמה ואז לשלוח לקליינט שקשור ליוזר
                 tmp = data.removesuffix(">")
                 msg = "<msg>" + data
+                self.send_to_one(tmp, msg)
 
     def broadcast(self, message):
         for client in self.clientslist:
@@ -71,8 +72,4 @@ class Server:
             if client == target:
                 target.send(message.encode())
 
-    # def run_udp(self):
 
-# if __name__ == '__main__':
-#     server = Server(50000, 'b', 15, "127.0.0.1")
-#     server.run_tcp()
