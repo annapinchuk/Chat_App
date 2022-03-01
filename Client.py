@@ -35,6 +35,11 @@ class Client:
         message = '<set_msg_all>' + msg
         self.soc.send(message.encode())
 
+    def write_to_user(self, user):
+        msg = self.username + " : " + input("")
+        message = '<set_msg>' + user + "," + msg
+        self.soc.send(message.encode())
+
     def receive(self):
         while True:
             data = self.soc.recv(1024).decode()

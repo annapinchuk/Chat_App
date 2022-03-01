@@ -54,7 +54,7 @@ class Server:
                 for addr in self.addresslist:
                     if addr != address:
                         msg += "," + self.userslist[addr]
-                self.send_to_one(address,"<msg>" + "<users>" + msg)
+                self.send_to_one(address, "<msg>" + "<users>" + msg)
 
             # send message to all clients
             elif data.startswith("<set_msg_all>"):
@@ -62,11 +62,12 @@ class Server:
                 msg = "<msg>" + data
                 self.broadcast(msg)
 
-            elif data.startswith("<set_msg>" + "<username>"):
-                data = data.removeprefix("<set_msg><")
-                # TODO: להפריד בין היוזר לבין ההודעה עצמה ואז לשלוח לקליינט שקשור ליוזר
-                tmp = data.removesuffix(">")
-                msg = "<msg>" + data
+            elif data.startswith("<set_msg>"):
+                data = data.removeprefix("<set_msg>")
+                user, tmp = data.split(',')
+                msg = "<msg>" + tmp + " (private)"
+                self.send_to_one(self.get_key(user), msg)  # send to target
+                self.send_to_one(address, msg)  # display on source
 
     def broadcast(self, message):
         for address in self.addresslist:
@@ -74,6 +75,13 @@ class Server:
 
     def send_to_one(self, address, message):
         self.soclist[address].send(message.encode())
+
+    # get the key of given value
+    def get_key(self, val):
+        for key, value in self.userslist.items():
+            if val == value:
+                return key
+        return "key doesn't exist"
 
     # def run_udp(self):
 
