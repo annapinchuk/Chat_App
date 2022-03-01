@@ -12,4 +12,4 @@ if __name__ == '__main__':
     client3r_thread = threading.Thread(target=client3.receive)
     client3r_thread.start()
     client3.write_to_all()
-    client3.write_to_one()
+    client3.disconnect()

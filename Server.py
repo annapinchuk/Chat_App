@@ -19,7 +19,6 @@ class Server:
         self.bool_file = True
         self.downloading = False
 
-
     def run(self):
         self.soc.listen(5)
         while True:
@@ -65,24 +64,25 @@ class Server:
                 msg = "<msg>" + data
                 self.broadcast(msg)
 
-            if data.startswith("<set_msg> <username>"):
-                data = data.removeprefix("<set_msg>")
-                tmp = data.removesuffix(">")
-                msg = "<msg>" + data
-                self.send_to_one(tmp, msg)
-
             # Return a list of the online users
-            if data.startswith("<get_list_file>"):
+            elif data.startswith("<get_list_file>"):
                 files = []
                 for f in self.file:
                     files.append(self.file[f])
                 return files
 
-            if data.startswith("<download>"):
+            elif data.startswith("<download>"):
                 print("test")
                 filename = "ro.txt"
                 self.put_file(filename)
                 self.send_file()
+                
+           elif data.startswith("<set_msg>"):
+              data = data.removeprefix("<set_msg>")
+              user, tmp = data.split(',')
+              msg = "<msg>" + tmp + " (private)"
+              self.send_to_one(self.get_key(user), msg)  # send to target
+              self.send_to_one(address, msg)  # display on source
 
     def send_file(self):
         sock_udp = socket(AF_INET, SOCK_DGRAM)
@@ -122,3 +122,9 @@ class Server:
     def send_to_one(self, address, message):
         self.soclist[address].send(message.encode())
 
+    # get the key of given value
+    def get_key(self, val):
+        for key, value in self.userslist.items():
+            if val == value:
+                return key
+        return "key doesn't exist"

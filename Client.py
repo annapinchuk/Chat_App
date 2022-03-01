@@ -37,11 +37,6 @@ class Client:
         message = '<set_msg_all>' + msg
         self.soc.send(message.encode())
 
-    def write_to_one(self):
-        msg = self.username + " : " + input("")
-        message = '<set_msg>' + msg
-        self.soc.send(message.encode())
-
     def request_download(self):
         msg = '<download>' + self.username
         self.soc.send(msg.encode())
@@ -63,6 +58,11 @@ class Client:
             k = data[5:]
             file.write(k)
         file.close()
+        
+    def write_to_user(self, user):
+        msg = self.username + " : " + input("")
+        message = '<set_msg>' + user + "," + msg
+        self.soc.send(message.encode())
 
     def receive(self):
         while True:
@@ -75,4 +75,5 @@ class Client:
                     names = data.split(",")
                     print(names)
                 else:
+
                     print(data)
