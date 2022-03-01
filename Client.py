@@ -1,5 +1,6 @@
 import sys
 import threading
+import time
 from socket import *
 
 
@@ -7,7 +8,7 @@ class Client:
     def __init__(self, host):
         self.port = 0
         self.host = host
-        self.username = input("Enter your name: ")
+        self.username = input("Choose your nickname: ")
         try:
             self.soc = socket(AF_INET, SOCK_STREAM)
         except socket.error as e:
@@ -27,24 +28,41 @@ class Client:
         msg = "<disconnect>" + self.username
         self.soc.send(msg.encode())
 
+    def list_of_users(self):
+        msg = "<get_users>" + self.username
+        self.soc.send(msg.encode())
+
     def write_to_all(self):
-        while True:
-            msg = self.username + " : " + input('<set_msg_all> ')
-            message = '<set_msg_all> ' + msg
-            self.soc.send(message.encode())
+        msg = self.username + " : " + input("")
+        message = '<set_msg_all>' + msg
+        self.soc.send(message.encode())
 
     def write_to_one(self):
-        while True:
-            msg = self.username + " : " + input('<set_msg>')
-            message = '<set_msg>' + '<username>' + msg
-            name = message.removeprefix('<set_msg><') + message.removesuffix('>')
-            self.soc.send(message.encode())
+        msg = self.username + " : " + input("")
+        message = '<set_msg>' + msg
+        self.soc.send(message.encode())
 
-    def all_onlineUsers(self):
+    def request_download(self):
+        msg = '<download>' + self.username
+        self.soc.send(msg.encode())
+        time.sleep(5)
+        threading.Thread(target=self.get_file, args=()).start()
+
+    def get_file(self):
+        file = open("ro1.txt", "wb")
+        socket_udp = socket(AF_INET, SOCK_DGRAM)
+        socket_udp.sendto("start".encode(), ("127.0.0.1", 55000))
         while True:
-            msg = self.username + " : " + input('<get_users>')
-            message = '<get_users>' + msg
-            self.soc.send(message.encode())
+            data, addr = socket_udp.recvfrom(505)
+            seq = data[:5]
+            #print(seq)
+            seq = int.from_bytes(seq, "big")
+            if seq == 431366235425:
+                break
+            socket_udp.sendto(seq.to_bytes(5, "big"), addr)
+            k = data[5:]
+            file.write(k)
+        file.close()
 
     def receive(self):
         while True:
@@ -52,6 +70,9 @@ class Client:
             if not data: break
             if data.startswith("<msg>"):
                 data = data.removeprefix("<msg>")
-                print(data)
-
-#
+                if data.startswith("<users>"):
+                    data = data.removeprefix("<users>")
+                    names = data.split(",")
+                    print(names)
+                else:
+                    print(data)
