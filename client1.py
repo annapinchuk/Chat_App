@@ -11,8 +11,8 @@ if __name__ == '__main__':
     # Thread to client receive
     client1r_thread = threading.Thread(target=client1.receive)
     client1r_thread.start()
+    client1.request_download()
     # client1.write_to_all()
     client1.write_to_user("anna")
-
 
 

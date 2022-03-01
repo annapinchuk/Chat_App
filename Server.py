@@ -11,11 +11,13 @@ class Server:
         self.addresslist = []  # list of addresses
         self.host = host
         self.sok_range = sok_range
-        self.file = []  # {filename:file}[]
+        self.file = {}  # {filename:file}[]
         self.port = port
         # starting the sever
         self.soc = socket(AF_INET, SOCK_STREAM)
         self.soc.bind((host, port))
+        self.bool_file = True
+        self.downloading = False
 
     def run(self):
         self.soc.listen(5)
@@ -62,12 +64,56 @@ class Server:
                 msg = "<msg>" + data
                 self.broadcast(msg)
 
-            elif data.startswith("<set_msg>"):
-                data = data.removeprefix("<set_msg>")
-                user, tmp = data.split(',')
-                msg = "<msg>" + tmp + " (private)"
-                self.send_to_one(self.get_key(user), msg)  # send to target
-                self.send_to_one(address, msg)  # display on source
+            # Return a list of the online users
+            elif data.startswith("<get_list_file>"):
+                files = []
+                for f in self.file:
+                    files.append(self.file[f])
+                return files
+
+            elif data.startswith("<download>"):
+                print("test")
+                filename = "ro.txt"
+                self.put_file(filename)
+                self.send_file()
+                
+           elif data.startswith("<set_msg>"):
+              data = data.removeprefix("<set_msg>")
+              user, tmp = data.split(',')
+              msg = "<msg>" + tmp + " (private)"
+              self.send_to_one(self.get_key(user), msg)  # send to target
+              self.send_to_one(address, msg)  # display on source
+
+    def send_file(self):
+        sock_udp = socket(AF_INET, SOCK_DGRAM)
+        sock_udp.bind(('127.0.0.1', 55000))
+        seq = 0
+        print(self.file)
+        while True:
+            data, addr = sock_udp.recvfrom(5)
+            if data.decode() == "start":
+                print(self.file)
+                self.downloading = True
+                while len(self.file.keys()):
+                    sock_udp.sendto(seq.to_bytes(5, "big")+self.file[seq], addr)
+                    data, addr = sock_udp.recvfrom(5)
+                    key = int.from_bytes(data, "big")
+                    # check if the key exists
+                    self.file.pop(key)
+                    seq += 1
+                print("done")
+                sock_udp.sendto("done!".encode(), addr)
+
+    def put_file(self, filename):
+        file = open(filename, "rb")
+        packet = file.read(500)
+        ind = 0
+        while packet:
+            self.file[ind] = packet
+            ind +=1
+            packet = file.read(500)
+
+        file.close()
 
     def broadcast(self, message):
         for address in self.addresslist:
@@ -82,9 +128,3 @@ class Server:
             if val == value:
                 return key
         return "key doesn't exist"
-
-    # def run_udp(self):
-
-# if __name__ == '__main__':
-#     server = Server(50000, 'b', 15, "127.0.0.1")
-#     server.run_tcp()

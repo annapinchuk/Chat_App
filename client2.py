@@ -1,4 +1,7 @@
 import threading
+from Client import Client
+from Server import Server
+
 from datetime import time
 
 import switch as switch
@@ -14,6 +17,9 @@ if __name__ == '__main__':
     # Thread to client receive
     client2r_thread = threading.Thread(target=client2.receive)
     client2r_thread.start()
+    client2.list_of_users()
+    client2.write_to_one()
+
     # switch case
     isworking = True
     while isworking:
