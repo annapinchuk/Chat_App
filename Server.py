@@ -107,8 +107,11 @@ class Server:
                 print('timeout!')
                 continue
             ack = ack.decode()
-            if int(ack) == send_seq:
-                send_seq += 1
+            try:
+                if int(ack) == send_seq:
+                    send_seq += 1
+            except Exception:
+                print('file send!')
 
         # sock_udp = socket(AF_INET, SOCK_DGRAM)
         # sock_udp.bind(('127.0.0.1', 55000))
@@ -154,13 +157,16 @@ class Server:
 
     # creates dada grams
     def put_file(self, filename):
-        with open(filename, "rb") as file:
+        file = open(filename, 'rb')
+        packet = file.read(1024)
+        ind = 0
+        while packet:
+            self.file[ind] = packet
+            ind += 1
             packet = file.read(1024)
-            ind = 0
-            while packet:
-                self.file[ind] = packet
-                ind += 1
-                packet = file.read(1024)
+        file.close()
+
+
 
     def broadcast(self, message):
         for address in self.addresslist:

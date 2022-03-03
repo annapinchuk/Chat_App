@@ -58,9 +58,8 @@ class Client:
 
         file_data = {}  # dict (seq: data)
         addr = None
-        braker = 0
-        while braker != self.pkts_size:
-            braker = len(file_data)
+
+        while len(file_data) != int(self.pkts_size):
             print(f'len of the received {len(file_data)}')
             pkt = None
             try:
@@ -76,10 +75,11 @@ class Client:
 
         self.sock_udp.sendto('FIN'.encode(), addr)
         self.write_file(file_data, file_name)
+        print('file downloaded!')
 
     def write_file(self, file_data: dict, file_name):
         file_data = sorted(list(file_data.items()), key=lambda x: x[0])
-        file = open('file_name.png', 'wb')
+        file = open('C:/Users/אנהפינצוק/Desktop/client_received.png', 'wb')
         for seq, data in file_data:
             file.write(data)
         file.close()
