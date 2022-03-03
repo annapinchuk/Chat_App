@@ -18,7 +18,6 @@ if __name__ == '__main__':
     client2r_thread = threading.Thread(target=client2.receive)
     client2r_thread.start()
     client2.list_of_users()
-    client2.write_to_one()
 
     # switch case
     isworking = True
