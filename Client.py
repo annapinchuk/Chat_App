@@ -9,7 +9,6 @@ from socket import *
 class Client:
     def __init__(self, host):
         self.server_addr = ('127.0.0.1', 50000)
-        self.port = 0
         self.host = host
         self.pkts = []  # (seq, data)
         self.username = input("Choose your nickname: ")
