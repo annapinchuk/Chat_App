@@ -15,9 +15,13 @@ This class is used to execute the client's requests. 'server.py' contains a set 
 |-----------------|-----------------------|
 | `def run(self):` | Create a connection with the client by openning a socket and using threads. |
 | `def receive(self, client_soc, address)` | Receive all the requests of the client. |
-| `def send_file(self)` | Send file over UDP protocol. |
+| `def send_file(self, client_addr: tuple):` | Send file over UDP protocol. |
 | `def broadcast(self, message)` | Send a broadcast message to all online users. |
 | `def send_to_one(self, address, message)` | Send a message to a specific client. |
+| `def udp_handshake(self, client_addr: tuple)` |  3 way hand shake starting in the sever. |
+| `def put_file(self, filename)` | creates data grams. |
+| `def send_to_one(self, address, message)` | Send a message to a specific client. |
+| `def get_key(self, val)` |get the key of given value. |
 
 
 ## <ins>***The Client***<ins> 
@@ -27,11 +31,17 @@ This class is use to communicate with the server in order to create interactions
   
   | **Functions**      |    **Explanation**        |
 |-----------------|-----------------------|
-| `def run(self):` | Create a connection with the client by openning a socket and using threads. |
-| `def receive(self, client_soc, address)` | Receive all the requests of the client. |
-| `def send_file(self)` | Send file over UDP protocol. |
-| `def broadcast(self, message)` | Send a broadcast message to all online users. |
-| `def send_to_one(self, address, message)` | Send a message to a specific client. | 
+| `def connect(self)` | sending request to connect. |
+| `def disconnect(self)` | sending request to disconnect. |
+| `def list_of_users(self)` | sending request to see online members. |
+| `def list_of_files(self)` | sending request to see available files. |
+| `ddef write_to_all(self)` | sending request to send message to all online members. | 
+| `def write_to_user(self, user)` | sending request to send message to one member. |
+| `def request_download(self)` | sending request to download a file. |
+| `def receive(self)` | TCP receive function. |
+| `def get_file(self, file_name)` | receiving file in UDP connection from server. |
+| `def write_file(self, file_data: dict, filetype)` |  write file to given place in computer. | 
+| `def udp_handshake(self)` | 3 way hand shake starting in the sever. |
   
 
 ## How to run
