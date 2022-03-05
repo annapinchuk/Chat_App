@@ -11,5 +11,7 @@ if __name__ == '__main__':
     # Thread to client receive
     client3r_thread = threading.Thread(target=client3.receive)
     client3r_thread.start()
+    client3.list_of_files()
+    client3.request_download()
     client3.write_to_all()
     client3.disconnect()
