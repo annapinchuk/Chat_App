@@ -36,9 +36,21 @@ This class is use to communicate with the server in order to create interactions
 
 ## How to run
 
-For running the Chat, you first need to run the `server.py`, creating a connnection with the client on particular IP and port, the server listens to the client's requests for sending a broadcast message, get all the online users, disconnect a client and serveral other functions. The server is connect to the the ip `127.0.0.1` and to `50000` as a port number. You can also run the server on the command prompt:
+For running the Chat, you first need to run the `serv.py`, creating a connnection with the client on particular IP and port, the server listens to the client's requests for sending a broadcast message, get all the online users, disconnect a client and serveral other functions. The server is connect to the the ip `127.0.0.1` and to `50000` as a port number. You can also run the server on the command prompt:
 
-    py server.py
+    py serv.py
+  
+ then you will need to run the 'client 1/2/3': client 2 is doing all the functions.
+  
+    py client 2.py
+ 
+ you can run the clients in the same time and have a nice chat between them.
+ 
+ bugs: somtimes when you dont close the client well you need to kill the process like that:  <br />
+ open teminal in the project   <br />
+ netstat -ano | find "50000"  <br />
+ taskkill /F /PID *add here the reasult from above*  <br />
+ 
     
 Then you can add clients in the Chat, `client.py` contains a lot of features, he sends a key word to the server and the server who is connecting on the same ip,reveive all the queries and execute them. For adding a client on the commamd prompt:
 
