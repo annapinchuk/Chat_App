@@ -1,34 +1,28 @@
 import threading
+import time
 from Client import Client
-from Server import Server
-
-from datetime import time
-
-import switch as switch
-
-from Client import Client
-from Server import Server
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    client2 = Client('127.0.0.1')
+    ip = input("enter your ip in this format: 0.0.0.0 \n")
+    client2 = Client(ip)
     client2in_thread = threading.Thread(target=client2.connect)
     client2in_thread.start()
     # Thread to client receive
     client2r_thread = threading.Thread(target=client2.receive)
     client2r_thread.start()
-    client2.list_of_users()
-    client2.write_to_one()
 
     # switch case
     isworking = True
     while isworking:
-
+        time.sleep(0.1)
         choise = input("choose one of the following : \n"
                        "1 : send massage to all \n"
                        "2 : send massage to one of users online \n"
                        "3 : see the list of the online users \n"
-                       "4 : disconnect from chat \n")
+                       "4 : see the list of the files \n"
+                       "5 : download a file \n"
+                       "6 : disconnect from chat \n")
         if choise == '1':
             thread1 = threading.Thread(target=client2.write_to_all)
             thread1.start()
@@ -45,10 +39,20 @@ if __name__ == '__main__':
             thread3.join()
 
         elif choise == '4':
+            thread4 = threading.Thread(target=client2.list_of_files())
+            thread4.start()
+            thread4.join()
+
+        elif choise == '5':
+            thread4 = threading.Thread(target=client2.request_download())
+            thread4.start()
+            thread4.join()
+
+        elif choise == '6':
             thread4 = threading.Thread(target=client2.disconnect)
             thread4.start()
             thread4.join()
             isworking = False
 
         else:
-            print("pls enter number from 1 to 4")
+            print("pls enter number from 1 to 6")
