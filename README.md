@@ -56,6 +56,8 @@ For running the Chat, you first need to run the `serv.py`, creating a connnectio
  
  you can run the clients in the same time and have a nice chat between them.
  
+ For download files, you need to change the path location and put the correct path of the location file on you computer:
+     file = open('<your path>/Chat_App/files/client_received.gif', 'wb')
  bugs: somtimes when you dont close the client well you need to kill the process like that:  <br />
  open teminal in the project   <br />
  netstat -ano | find "50000"  <br />
