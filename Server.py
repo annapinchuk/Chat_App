@@ -64,6 +64,7 @@ class Server:
                 elif data.startswith("<disconnect>"):
                     self.threadlist[address] = False
                     self.broadcast("<msg>" + self.userslist[address] + "  has left the chat !")
+                    print(self.userslist[address]+ " left the chat \n")
                     del self.userslist[address]
                     del self.soclist[address]
                     self.addresslist.remove(address)
@@ -110,8 +111,7 @@ class Server:
                     self.send_to_one(self.get_key(user), msg)  # send to target
                     self.send_to_one(address, msg)  # display on source
 
-
-    # sends given file
+    # sends given file stop and wait implementation
     def send_file(self, client_addr: tuple):
         conn = self.udp_handshake(client_addr)
         while not conn:
@@ -121,21 +121,31 @@ class Server:
         sock = self.udp_sock[client_addr]
         size = len(self.file)
         ack = ''
-        while ack != 'FIN':  # send file until the finish syn
+        i = 0
+        while (ack != 'FIN') or (ack != 'NOFIN'):  # send file until the finish syn
             if send_seq < size:
                 pkt = pickle.dumps((send_seq, self.file[send_seq]))  # pkt contains seq number and data gram
                 sock.sendto(pkt, client_addr)
             try:
                 ack, addr = sock.recvfrom(1024)
-            except timeout as to:
+            except timeout:
                 print('timeout!')
+                i += 1
+                self.udp_sock[client_addr].settimeout(3 + i)
                 continue
             ack = ack.decode()
             try:
+                i = 0
                 if int(ack) == send_seq:
                     send_seq += 1
-            except Exception:  # the final ack is "FIN"
-                print('file sent!')
+            except Exception:  # the final ack is "FIN" or "NOFIN
+                if str(ack).startswith('FIN'):
+                    print('file sent!')
+                    ack = 'FIN'
+                    break
+                else:
+                    print('download stoped')
+                    break
 
     # 3 way hand shake starting in the sever
     def udp_handshake(self, client_addr: tuple):

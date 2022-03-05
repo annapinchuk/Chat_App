@@ -13,7 +13,7 @@ class Client:
         self.pkts = []  # (seq, data)
         self.username = input("Choose your nickname: ")
         self.sock_udp = None
-        self.pkts_size = None
+        self.pkts_size = None  # size of data grams in file,String
         # starting the client
         try:
             self.soc = socket(AF_INET, SOCK_STREAM)
@@ -93,30 +93,43 @@ class Client:
 
         file_data = {}  # dict (seq: data)
         addr = None
-        while len(file_data) != int(self.pkts_size):
+        isstop = False
+        while (len(file_data) != int(self.pkts_size)) and (not isstop):
             pkt = None
             try:
-                pkt, addr = self.sock_udp.recvfrom(2000)    # receive 2000 bytes
-            except timeout as to:
+                pkt, addr = self.sock_udp.recvfrom(2000)  # receive 2000 bytes
+            except timeout:
                 print('time out!')
             seq, data = pickle.loads(pkt)  # convert bytes to objects
-            print(f'client received pkt seq {seq}')
-            if seq not in list(file_data.keys()):
-                file_data[seq] = data
-            print('sending ack!')
-            self.sock_udp.sendto(str(seq).encode(), addr)
-        self.sock_udp.sendto('FIN'.encode(), addr)
-        name, filetype = str(file_name).split(".")
-        self.write_file(file_data, filetype)
-        last = file_data[int(self.pkts_size)-1]
-        last = bytes(last)
-        if filetype != "mp4":
-            print('file downloaded!' + " the last byte is: " + bytes(last[-8:]).decode()) # prints the last byte
-        else:
-            print('file downloaded!')
+            if int(seq) == int(int(self.pkts_size) / 2):  # asks to stop after 50%
+                stop = input("Do you want to continue? type YES/NO \n")
+                if stop == "NO":
+                    self.sock_udp.sendto('NOFIN'.encode(), addr)
+                    print("You stopped the downloading \n")
+                    isstop = True
+                    break
+                elif stop == "YES":
+                    pass
+            if isstop is False:
+                if seq not in list(file_data.keys()):
+                    file_data[seq] = data
+                    print(f'client received pkt seq {seq}')
+                    print('sending ack!')
+                self.sock_udp.sendto(str(seq).encode(), addr)
+        if isstop is False:
+            self.sock_udp.sendto('FIN'.encode(), addr)
+            name, filetype = str(file_name).split(".")
+            last = file_data[int(self.pkts_size) - 1]
+            self.write_file(file_data, filetype)
+            last = bytes(last)
+            if (filetype != "mp4") and (filetype != "mp3") and (filetype != "png"):
+                print('file downloaded!, your file is in "files" dictionary' + " the last byte is: " + bytes(
+                    last[-8:]).decode())  # prints the last byte
+            else:
+                print('file downloaded!, your file is in "files" dictionary')
 
     # write file to given place in computer
-    def write_file(self, file_data: dict,filetype):
+    def write_file(self, file_data: dict, filetype):
         file_data = sorted(list(file_data.items()), key=lambda x: x[0])
         if filetype == "png":
             # $$change code here to save where ever you want$$
