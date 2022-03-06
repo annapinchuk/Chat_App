@@ -4,6 +4,14 @@
 # Chat_App 📱
 This is a simple Chat app over TCP with file handeling over reliable UDP as a final project for Network Course.
 
+
+  <br />
+
+https://user-images.githubusercontent.com/92322613/156930690-0b332c3d-5c28-426d-b296-410ca4c6d080.mp4
+
+
+  <br />
+
 ## <ins>***The Server***<ins> 
   
 
@@ -53,11 +61,11 @@ This class is use to communicate with the server in order to create interactions
 
 For running the Chat, you first need to run the `serv.py`, creating a connnection with the client on particular IP and port, the server listens to the client's requests for sending a broadcast message, get all the online users, disconnect a client and serveral other functions. The server is connect to the the ip `127.0.0.1` and to `50000` as a port number. You can also run the server on the command prompt:
 
-    py serv.py
+    python3 serv.py
   
  then you will need to run the 'client 1/2/3': client 2 is doing all the functions.
   
-    py client 2.py
+    python3 client 2.py
  
  you can run the clients in the same time and have a nice chat between them.
  
@@ -69,8 +77,9 @@ For running the Chat, you first need to run the `serv.py`, creating a connnectio
  open teminal in the project   <br />
  netstat -ano | find "50000"  <br />
  taskkill /F /PID *add here the reasult from above*  <br />
+  You can run the chat in `Windows` and `Linux` with the command `python3` or `python3.9`
  
     
 Then you can add clients in the Chat, `client.py` contains a lot of features, he sends a key word to the server and the server who is connecting on the same ip,reveive all the queries and execute them. For adding a client on the commamd prompt:
 
-    py client.py
+    python3 client.py
