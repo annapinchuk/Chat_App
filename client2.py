@@ -11,11 +11,10 @@ if __name__ == '__main__':
     # Thread to client receive
     client2r_thread = threading.Thread(target=client2.receive)
     client2r_thread.start()
-
     # switch case
     isworking = True
     while isworking:
-        time.sleep(0.1)
+        time.sleep(2)
         choise = input("choose one of the following : \n"
                        "1 : send massage to all \n"
                        "2 : send massage to one of users online \n"

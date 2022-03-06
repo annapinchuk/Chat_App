@@ -6,6 +6,7 @@ from socket import *
 
 
 class Server:
+    #
     # Create server
     def __init__(self, port, files, host):
         self.userslist = {}  # address is unique -> userlist is string
@@ -16,12 +17,11 @@ class Server:
         self.file = {}  # {seq:datagrams}[]
         self.fileslist = files  # list of files in the server
         self.port = port
-        self.bool_file = True
-        self.downloading = False
         self.udp_sock = {}  # address is unique -> socket
+
         # starting the sever
         try:
-            self.soc = socket(AF_INET, SOCK_STREAM)
+            self.soc = socket(AF_INET, SOCK_STREAM)  # TCP SOCKET
         except error as e:
             print("Error creating socket: %s" % e)
             sys.exit(1)
@@ -64,7 +64,7 @@ class Server:
                 elif data.startswith("<disconnect>"):
                     self.threadlist[address] = False
                     self.broadcast("<msg>" + self.userslist[address] + "  has left the chat !")
-                    print(self.userslist[address]+ " left the chat \n")
+                    print(self.userslist[address] + " left the chat \n")
                     del self.userslist[address]
                     del self.soclist[address]
                     self.addresslist.remove(address)
@@ -89,7 +89,7 @@ class Server:
                     msg = "<msg>" + data
                     self.broadcast(msg)
 
-                # Return a list of the online users
+                # Return a list of the files
                 elif data.startswith("<get_list_file>"):
                     files = []
                     for f in self.file:
@@ -121,7 +121,7 @@ class Server:
         sock = self.udp_sock[client_addr]
         size = len(self.file)
         ack = ''
-        i = 0
+        i = 0  # timeout index
         while (ack != 'FIN') or (ack != 'NOFIN'):  # send file until the finish syn
             if send_seq < size:
                 pkt = pickle.dumps((send_seq, self.file[send_seq]))  # pkt contains seq number and data gram
@@ -155,6 +155,7 @@ class Server:
             sock_udp.sendto(f'<udp-syn-{len(self.file)}>'.encode(), client_addr)  # sending the size of the file in
             # data grams
             sock_udp.settimeout(3)
+            addr = None
             try:
                 syn_ack, addr = sock_udp.recvfrom(1024)
             except error as e:
