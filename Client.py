@@ -63,7 +63,9 @@ class Client:
         file_name = input("\ntype the name of the file you want to download\n")
         msg = '<download>' + self.username + ',' + file_name
         self.soc.send(msg.encode())
-        threading.Thread(target=self.get_file, args=[file_name, ]).start()
+        th = threading.Thread(target=self.get_file, args=[file_name, ])
+        th.start()
+        th.join()
 
     # TCP receive function
     def receive(self):
@@ -100,7 +102,13 @@ class Client:
                 pkt, addr = self.sock_udp.recvfrom(2000)  # receive 2000 bytes
             except timeout:
                 print('time out!')
-            seq, data = pickle.loads(pkt)  # convert bytes to objects
+            if pkt is not None:
+                seq, data = pickle.loads(pkt)  # convert bytes to objects
+                if seq not in file_data.keys():
+                    file_data[seq] = data
+                    print(f'client received pkt seq {seq}')
+                    print('sending ack!')
+                self.sock_udp.sendto(str(seq).encode(), addr)
             if int(seq) == int(int(self.pkts_size) / 2):  # asks to stop after 50%
                 stop = input("Do you want to continue? type YES/NO \n")
                 if stop == "NO":
@@ -110,12 +118,6 @@ class Client:
                     break
                 elif stop == "YES":
                     pass
-            if isstop is False:
-                if seq not in list(file_data.keys()):
-                    file_data[seq] = data
-                    print(f'client received pkt seq {seq}')
-                    print('sending ack!')
-                self.sock_udp.sendto(str(seq).encode(), addr)
         if isstop is False:
             self.sock_udp.sendto('FIN'.encode(), addr)
             name, filetype = str(file_name).split(".")
