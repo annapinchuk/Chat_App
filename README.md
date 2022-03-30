@@ -61,11 +61,11 @@ This class is use to communicate with the server in order to create interactions
 
 For running the Chat, you first need to run the `serv.py`, creating a connnection with the client on particular IP and port, the server listens to the client's requests for sending a broadcast message, get all the online users, disconnect a client and serveral other functions. The server is connect to the the ip `127.0.0.1` and to `50000` as a port number. You can also run the server on the command prompt:
 
-    python3 serv.py
+    python3.9 serv.py
   
  then you will need to run the 'client 1/2/3': client 2 is doing all the functions.
   
-    python3 client 2.py
+    python3.9 client 2.py
  
  you can run the clients in the same time and have a nice chat between them.
  
